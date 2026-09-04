@@ -1,0 +1,6 @@
+{
+  "name": "@nutrisnap/config",
+  "version": "0.0.0",
+  "private": true,
+  "main": "design-tokens.js"
+}
