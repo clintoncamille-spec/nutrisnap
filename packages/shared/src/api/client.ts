@@ -84,6 +84,13 @@ export class NutriSnapApiClient {
     });
   }
 
+  async deletePhoto(photoPath: string): Promise<void> {
+    await this.request<void>("/api/uploads", {
+      method: "DELETE",
+      body: JSON.stringify({ photoPath }),
+    });
+  }
+
   async analyzeMeal(photoPath: string): Promise<MealAnalysisResult> {
     return this.request<MealAnalysisResult>("/api/meals/analyze", {
       method: "POST",

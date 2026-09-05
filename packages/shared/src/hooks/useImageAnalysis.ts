@@ -14,7 +14,12 @@ export function useAnalyzeMeal(api: NutriSnapApiClient) {
   return useMutation<MealAnalysisResult, Error, UploadFile>({
     mutationFn: async (file) => {
       const { photoPath } = await api.uploadPhoto(file);
-      return api.analyzeMeal(photoPath);
+      try {
+        return await api.analyzeMeal(photoPath);
+      } catch (error) {
+        await api.deletePhoto(photoPath).catch(() => undefined);
+        throw error;
+      }
     },
   });
 }
@@ -23,7 +28,12 @@ export function useAnalyzeFridge(api: NutriSnapApiClient) {
   return useMutation<FridgeAnalysisResult, Error, UploadFile>({
     mutationFn: async (file) => {
       const { photoPath } = await api.uploadPhoto(file);
-      return api.analyzeFridge(photoPath);
+      try {
+        return await api.analyzeFridge(photoPath);
+      } catch (error) {
+        await api.deletePhoto(photoPath).catch(() => undefined);
+        throw error;
+      }
     },
   });
 }
