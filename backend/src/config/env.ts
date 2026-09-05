@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateCorsOrigin } from "../lib/security.js";
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
@@ -28,8 +29,10 @@ export function loadEnv(): Env {
     console.error("Invalid environment configuration:", parsed.error.flatten().fieldErrors);
     process.exit(1);
   }
-  if (parsed.data.NODE_ENV === "production" && parsed.data.CORS_ORIGIN === "*") {
-    console.error("CORS_ORIGIN must be explicit in production");
+  try {
+    validateCorsOrigin(parsed.data.NODE_ENV, parsed.data.CORS_ORIGIN);
+  } catch (error) {
+    console.error((error as Error).message);
     process.exit(1);
   }
   return parsed.data;

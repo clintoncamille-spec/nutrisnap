@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { calculateMealTotals } from "../lib/security.js";
 import { mealLogRepository, scanHistoryRepository } from "../repositories/index.js";
 import { imageStorage } from "../services/storage/supabaseStorage.js";
 import { VisionProviderError, visionProvider } from "../services/vision/index.js";
@@ -102,15 +103,7 @@ export async function mealsRoutes(app: FastifyInstance) {
       });
     }
 
-    const totals = log.items.reduce(
-      (sum, item) => ({
-        calories: sum.calories + item.calories,
-        proteinG: sum.proteinG + item.proteinG,
-        carbsG: sum.carbsG + item.carbsG,
-        fatG: sum.fatG + item.fatG,
-      }),
-      { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 },
-    );
+    const totals = calculateMealTotals(log.items);
     const created = await mealLogRepository.create(request.userId, {
       ...log,
       scanHistoryId: scanId,

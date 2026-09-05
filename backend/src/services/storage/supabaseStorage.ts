@@ -1,4 +1,5 @@
 import { env } from "../../config/env.js";
+import { isUserOwnedPath } from "../../lib/security.js";
 import { supabase } from "../../repositories/supabase/client.js";
 import type { ImageStorage } from "./types.js";
 
@@ -37,7 +38,7 @@ class SupabaseImageStorage implements ImageStorage {
   }
 
   isOwnedByUser(userId: string, path: string): boolean {
-    return path.startsWith(`${userId}/`);
+    return isUserOwnedPath(userId, path);
   }
 }
 
