@@ -40,6 +40,13 @@ class SupabaseImageStorage implements ImageStorage {
   isOwnedByUser(userId: string, path: string): boolean {
     return isUserOwnedPath(userId, path);
   }
+
+  async remove(path: string): Promise<void> {
+    const { error } = await supabase.storage
+      .from(env.STORAGE_BUCKET)
+      .remove([path]);
+    if (error) throw new Error(`Storage deletion failed: ${error.message}`);
+  }
 }
 
 function sanitizeFileName(name: string): string {

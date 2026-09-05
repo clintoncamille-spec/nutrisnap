@@ -7,4 +7,5 @@ export interface ImageStorage {
   ): Promise<{ path: string; signedUrl: string }>;
   getSignedUrl(path: string, expiresInSeconds?: number): Promise<string>;
   isOwnedByUser(userId: string, path: string): boolean;
+  remove(path: string): Promise<void>;
 }
