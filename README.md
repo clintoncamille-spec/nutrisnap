@@ -80,4 +80,3 @@ it at a production project.
 
 - `packages/shared` carries its own `react`/`@types/react` devDependency so it can be typechecked standalone; this creates a second physical `react` copy on disk that `expo-doctor` flags as a duplicate. Metro is configured (`apps/mobile/metro.config.js` → `resolver.extraNodeModules`) to always resolve `react`/`react-native` to the mobile app's own copy regardless, so this shouldn't cause runtime "Invalid hook call" issues, but it's worth revisiting if dependency versions drift further apart.
 - No food-search endpoint yet for manually adding a food item in the Results screen — users enter grams/macros by hand for now.
-- Per-user rate limiting on the expensive `/analyze` routes isn't wired up yet (only a global IP-based limit); see the comment in `backend/src/server.ts`.

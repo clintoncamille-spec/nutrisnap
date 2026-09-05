@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { analyzeRateLimit } from "../middleware/analyzeRateLimit.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { scanHistoryRepository } from "../repositories/index.js";
 import { imageStorage } from "../services/storage/supabaseStorage.js";
@@ -14,7 +15,7 @@ const analyzeBodySchema = z.object({ photoPath: z.string().min(1) });
 export async function fridgeRoutes(app: FastifyInstance) {
   app.post(
     "/api/fridge/analyze",
-    { onRequest: requireAuth },
+    { onRequest: requireAuth, preHandler: analyzeRateLimit },
     async (request, reply) => {
       const parsed = analyzeBodySchema.safeParse(request.body);
       if (!parsed.success) {

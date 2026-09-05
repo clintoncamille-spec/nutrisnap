@@ -18,6 +18,8 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
   RATE_LIMIT_MAX: z.coerce.number().default(30),
   RATE_LIMIT_WINDOW: z.string().default("1 minute"),
+  ANALYZE_RATE_LIMIT_MAX: z.coerce.number().default(10),
+  ANALYZE_RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60_000),
   LOG_LEVEL: z.string().default("info"),
 });
 

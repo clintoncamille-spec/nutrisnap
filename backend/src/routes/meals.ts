@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { analyzeRateLimit } from "../middleware/analyzeRateLimit.js";
 import { requireAuth } from "../middleware/requireAuth.js";
-import { calculateMealTotals } from "../lib/security.js";
+import { verifyTotals } from "../lib/macros.js";
 import { mealLogRepository, scanHistoryRepository } from "../repositories/index.js";
 import { imageStorage } from "../services/storage/supabaseStorage.js";
 import { VisionProviderError, visionProvider } from "../services/vision/index.js";
@@ -32,7 +33,7 @@ const createMealLogSchema = z.object({
 export async function mealsRoutes(app: FastifyInstance) {
   app.post(
     "/api/meals/analyze",
-    { onRequest: requireAuth },
+    { onRequest: requireAuth, preHandler: analyzeRateLimit },
     async (request, reply) => {
       const parsed = analyzeBodySchema.safeParse(request.body);
       if (!parsed.success) {
@@ -103,14 +104,11 @@ export async function mealsRoutes(app: FastifyInstance) {
       });
     }
 
-    const totals = calculateMealTotals(log.items);
+    const totals = verifyTotals(log.items);
     const created = await mealLogRepository.create(request.userId, {
       ...log,
       scanHistoryId: scanId,
-      totalCalories: totals.calories,
-      totalProteinG: totals.proteinG,
-      totalCarbsG: totals.carbsG,
-      totalFatG: totals.fatG,
+      ...totals,
     });
 
     return reply.code(201).send(created);

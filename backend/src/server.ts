@@ -23,11 +23,12 @@ export async function buildServer() {
   await app.register(multipart, {
     limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
   });
-  // IP-based global limit as a baseline abuse guard. Per-user limits on the
-  // expensive /analyze routes specifically (keyed on the authenticated
-  // userId) are a documented follow-up — see project plan open items —
-  // since @fastify/rate-limit's global onRequest hook runs before any
-  // route-level auth hook populates request.userId.
+  // IP-based global limit as a baseline abuse guard, covering unauthenticated
+  // traffic and shared-IP scenarios. This runs as an onRequest hook, which
+  // fires before any route-level auth hook populates request.userId, so it
+  // can't be keyed per-user itself — see analyzeRateLimit.ts for the
+  // per-user preHandler limiter layered on top of the expensive
+  // /analyze routes specifically.
   await app.register(rateLimit, {
     max: env.RATE_LIMIT_MAX,
     timeWindow: env.RATE_LIMIT_WINDOW,

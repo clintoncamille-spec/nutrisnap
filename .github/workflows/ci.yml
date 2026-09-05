@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  # Dummy values so backend/src/config/env.ts (parsed at module load) never
+  # fails typecheck/test/build for lack of real secrets — no live service is
+  # ever contacted by lint/typecheck/test.
+  NODE_ENV: test
+  OPENAI_API_KEY: test-key
+  SUPABASE_URL: https://example.supabase.co
+  SUPABASE_SERVICE_ROLE_KEY: test-key
+  CORS_ORIGIN: http://localhost:5173
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
