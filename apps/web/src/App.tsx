@@ -1,5 +1,10 @@
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { History as CalendarIcon, Home as HomeIcon, User as UserIcon } from "lucide-react";
+import {
+  History as CalendarIcon,
+  Home as HomeIcon,
+  Sparkles as SparklesIcon,
+  User as UserIcon,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useProfile } from "@nutrisnap/shared";
 import { useAuth } from "./lib/AuthContext";
@@ -11,6 +16,7 @@ import { History } from "./pages/History";
 import { Login } from "./pages/Login";
 import { Onboarding } from "./pages/Onboarding";
 import { Profile } from "./pages/Profile";
+import { Coach } from "./pages/Coach";
 
 function RequireAuth({ children }: { children: React.ReactElement }) {
   const { session, loading } = useAuth();
@@ -67,6 +73,10 @@ function BottomNav() {
         <CalendarIcon size={20} />
         History
       </NavLink>
+      <NavLink to="/coach" className={linkClass}>
+        <SparklesIcon size={20} />
+        Coach
+      </NavLink>
       <NavLink to="/profile" className={linkClass}>
         <UserIcon size={20} />
         Profile
@@ -90,6 +100,7 @@ export function App() {
                   <Route path="/scan/:mode" element={<Scan />} />
                   <Route path="/results/:mode" element={<Results />} />
                   <Route path="/history" element={<History />} />
+                  <Route path="/coach" element={<Coach />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/onboarding" element={<OnboardingRoute />} />
                 </Routes>
