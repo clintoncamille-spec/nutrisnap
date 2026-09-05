@@ -10,3 +10,5 @@ dist/
 .venv/
 ios/
 android/
+.claude/settings.local.json
+**/.temp/

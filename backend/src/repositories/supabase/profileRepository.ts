@@ -1,19 +1,22 @@
 import { supabase } from "./client.js";
-import type { Profile, ProfileRepository } from "../types.js";
+import type { AdminProfileSummary, Profile, ProfileRepository } from "../types.js";
 
 interface Row {
+  id: string;
   display_name: string | null;
   daily_calorie_goal: number;
   daily_protein_goal_g: number;
   daily_carbs_goal_g: number;
   daily_fat_goal_g: number;
+  role: "user" | "admin";
 }
 
-const DEFAULTS: Omit<Row, "display_name"> = {
+const DEFAULTS: Omit<Row, "display_name" | "id"> = {
   daily_calorie_goal: 2000,
   daily_protein_goal_g: 100,
   daily_carbs_goal_g: 250,
   daily_fat_goal_g: 65,
+  role: "user",
 };
 
 function toDomain(row: Row): Profile {
@@ -23,6 +26,7 @@ function toDomain(row: Row): Profile {
     dailyProteinGoalG: row.daily_protein_goal_g,
     dailyCarbsGoalG: row.daily_carbs_goal_g,
     dailyFatGoalG: row.daily_fat_goal_g,
+    role: row.role,
   };
 }
 
@@ -56,6 +60,10 @@ class SupabaseProfileRepository implements ProfileRepository {
     await this.get(userId); // ensures the row exists
     const { data, error } = await supabase
       .from("profiles")
+      // `patch.role` is deliberately not read here — see the note on
+      // ProfileRepository.update in types.ts. This is the endpoint a
+      // signed-in user calls on their own profile (PATCH /api/profile);
+      // handling role here would let any user promote themselves to admin.
       .update({
         ...(patch.displayName !== undefined && { display_name: patch.displayName }),
         ...(patch.dailyCalorieGoal !== undefined && {
@@ -77,6 +85,17 @@ class SupabaseProfileRepository implements ProfileRepository {
 
     if (error || !data) throw new Error(`Failed to update profile: ${error?.message}`);
     return toDomain(data);
+  }
+
+  async listAll(): Promise<AdminProfileSummary[]> {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select()
+      .order("created_at", { ascending: true })
+      .returns<Row[]>();
+
+    if (error) throw new Error(`Failed to list profiles: ${error.message}`);
+    return (data ?? []).map((row) => ({ id: row.id, ...toDomain(row) }));
   }
 }
 

@@ -28,7 +28,7 @@ See the implementation plan for full architecture rationale.
    pnpm install
    ```
 
-2. **Backend**: copy `backend/.env.example` to `backend/.env` and fill in `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. Apply the schema in `backend/supabase/migrations/0001_init.sql` to your Supabase project (via the SQL editor or `supabase db push` if using the Supabase CLI), and create a Storage bucket named `meal-photos` if the migration's bucket insert doesn't run automatically in your project.
+2. **Backend**: copy `backend/.env.example` to `backend/.env` and fill in `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. Apply the schema in `backend/supabase/migrations/0001_init.sql` and `0002_add_admin_role.sql` (in order) to your Supabase project (via the SQL editor or `supabase db push` if using the Supabase CLI), and create a Storage bucket named `meal-photos` if the migration's bucket insert doesn't run automatically in your project.
 
 3. **Web**: copy `apps/web/.env.example` to `apps/web/.env.local` and fill in `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_API_BASE_URL` (defaults to `http://localhost:3000`).
 
@@ -49,6 +49,27 @@ pnpm dev:mobile    # Expo dev server (scan the QR with Expo Go, or press i/a for
 3. Scan a meal photo — confirm a calorie/macro breakdown appears, edit a portion, save it, and confirm it shows up in History.
 4. Scan a fridge/ingredients photo — confirm 3 recipes appear with steps and nutrition, and that favoriting one persists across a reload.
 5. Repeat the meal-scan flow on the mobile app (same Supabase account) and confirm the meal logged from web appears in mobile's History — this validates the shared backend end-to-end.
+
+## Admin role (testing)
+
+`profiles.role` (`'user'` default, or `'admin'`) gates a small, read-only admin
+surface — `GET /api/admin/users`, guarded by `requireAdmin` in
+`backend/src/routes/admin.ts` — for internal support/testing. There is no
+admin UI and no default/seeded admin account; nothing is promoted to admin
+except through the migration's RLS-backed `role` column itself.
+
+To get a test admin account locally, from `backend/` with `.env` pointing at
+your dev/test Supabase project:
+
+```
+pnpm seed:test-admin [email]   # defaults to test-admin@nutrisnap.local
+```
+
+This creates (or reuses) that Supabase Auth user, sets `profiles.role =
+'admin'` for it, and prints a freshly-generated password to your terminal —
+there is no fixed password, and the script refuses to run with
+`NODE_ENV=production`. Re-run it any time to rotate the password. Never point
+it at a production project.
 
 ## Notes on what's swappable
 

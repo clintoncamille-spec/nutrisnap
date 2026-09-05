@@ -56,6 +56,11 @@ export interface Profile {
   dailyProteinGoalG: number;
   dailyCarbsGoalG: number;
   dailyFatGoalG: number;
+  role: "user" | "admin";
+}
+
+export interface AdminProfileSummary extends Profile {
+  id: string;
 }
 
 export interface MealLogRepository {
@@ -89,5 +94,13 @@ export interface RecipeRepository {
 
 export interface ProfileRepository {
   get(userId: string): Promise<Profile>;
+  // Note: `patch.role` is intentionally never applied by implementations —
+  // role changes are an admin-only, out-of-band operation (see
+  // scripts/create-test-user.ts), never something a user can set on their
+  // own profile through this method.
   update(userId: string, patch: Partial<Profile>): Promise<Profile>;
+  // Admin-only: every user's profile, including role. Callers must gate
+  // this behind requireAdmin — the repository itself performs no
+  // authorization check.
+  listAll(): Promise<AdminProfileSummary[]>;
 }

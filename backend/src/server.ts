@@ -5,6 +5,7 @@ import sensible from "@fastify/sensible";
 import Fastify from "fastify";
 import { env } from "./config/env.js";
 import { MAX_UPLOAD_BYTES } from "./lib/imageLimits.js";
+import { adminRoutes } from "./routes/admin.js";
 import { fridgeRoutes } from "./routes/fridge.js";
 import { healthRoutes } from "./routes/health.js";
 import { mealsRoutes } from "./routes/meals.js";
@@ -40,6 +41,7 @@ export async function buildServer() {
   await app.register(recipesRoutes);
   await app.register(summaryRoutes);
   await app.register(profileRoutes);
+  await app.register(adminRoutes);
 
   return app;
 }
