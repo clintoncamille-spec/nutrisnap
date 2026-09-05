@@ -1,7 +1,8 @@
 import { Camera, Refrigerator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDailySummary } from "@nutrisnap/shared";
-import { colors } from "@nutrisnap/config/design-tokens";
+import { colors } from "../../../../packages/config/design-tokens.mjs";
+
 import { apiClient } from "../lib/apiClient";
 import { Card } from "../components/Card";
 import { ProgressRing } from "../components/ProgressRing";

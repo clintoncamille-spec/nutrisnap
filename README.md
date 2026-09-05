@@ -44,7 +44,7 @@ pnpm dev:mobile    # Expo dev server (scan the QR with Expo Go, or press i/a for
 
 ## Verifying it works end-to-end
 
-1. Start the backend, then `curl -X POST http://localhost:3000/api/health` — expect `{"status":"ok"}`.
+1. Start the backend, then `curl http://localhost:3000/api/health` — expect `{"status":"ok"}`.
 2. Sign up a user from the web app's login screen (this hits Supabase Auth directly, not the backend).
 3. Scan a meal photo — confirm a calorie/macro breakdown appears, edit a portion, save it, and confirm it shows up in History.
 4. Scan a fridge/ingredients photo — confirm 3 recipes appear with steps and nutrition, and that favoriting one persists across a reload.

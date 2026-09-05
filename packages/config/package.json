@@ -2,5 +2,10 @@
   "name": "@nutrisnap/config",
   "version": "0.0.0",
   "private": true,
-  "main": "design-tokens.js"
+  "main": "design-tokens.js",
+  "exports": {
+    ".": "./design-tokens.js",
+    "./design-tokens": "./design-tokens.js",
+    "./design-tokens.mjs": "./design-tokens.mjs"
+  }
 }
