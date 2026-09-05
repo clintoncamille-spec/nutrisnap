@@ -23,6 +23,10 @@ export async function fridgeRoutes(app: FastifyInstance) {
           .send({ error: "invalid_request", message: "photoPath is required" });
       }
 
+      if (!imageStorage.isOwnedByUser(request.userId, parsed.data.photoPath)) {
+        return reply.code(403).send({ error: "forbidden" });
+      }
+
       const signedUrl = await imageStorage.getSignedUrl(parsed.data.photoPath);
 
       try {

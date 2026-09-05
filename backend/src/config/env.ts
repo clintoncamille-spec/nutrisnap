@@ -14,7 +14,7 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   STORAGE_BUCKET: z.string().default("meal-photos"),
 
-  CORS_ORIGIN: z.string().default("*"),
+  CORS_ORIGIN: z.string().default("http://localhost:5173"),
   RATE_LIMIT_MAX: z.coerce.number().default(30),
   RATE_LIMIT_WINDOW: z.string().default("1 minute"),
   LOG_LEVEL: z.string().default("info"),
@@ -26,6 +26,10 @@ export function loadEnv(): Env {
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
     console.error("Invalid environment configuration:", parsed.error.flatten().fieldErrors);
+    process.exit(1);
+  }
+  if (parsed.data.NODE_ENV === "production" && parsed.data.CORS_ORIGIN === "*") {
+    console.error("CORS_ORIGIN must be explicit in production");
     process.exit(1);
   }
   return parsed.data;

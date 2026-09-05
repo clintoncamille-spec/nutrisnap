@@ -40,6 +40,10 @@ export async function mealsRoutes(app: FastifyInstance) {
           .send({ error: "invalid_request", message: "photoPath is required" });
       }
 
+      if (!imageStorage.isOwnedByUser(request.userId, parsed.data.photoPath)) {
+        return reply.code(403).send({ error: "forbidden" });
+      }
+
       const signedUrl = await imageStorage.getSignedUrl(parsed.data.photoPath);
 
       try {
@@ -90,9 +94,30 @@ export async function mealsRoutes(app: FastifyInstance) {
     }
 
     const { scanId, ...log } = parsed.data;
+    const scan = await scanHistoryRepository.getById(request.userId, scanId);
+    if (!scan || scan.scanType !== "meal" || scan.photoPath !== log.photoPath) {
+      return reply.code(400).send({
+        error: "invalid_request",
+        message: "Meal log must reference an owned meal scan",
+      });
+    }
+
+    const totals = log.items.reduce(
+      (sum, item) => ({
+        calories: sum.calories + item.calories,
+        proteinG: sum.proteinG + item.proteinG,
+        carbsG: sum.carbsG + item.carbsG,
+        fatG: sum.fatG + item.fatG,
+      }),
+      { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 },
+    );
     const created = await mealLogRepository.create(request.userId, {
       ...log,
       scanHistoryId: scanId,
+      totalCalories: totals.calories,
+      totalProteinG: totals.proteinG,
+      totalCarbsG: totals.carbsG,
+      totalFatG: totals.fatG,
     });
 
     return reply.code(201).send(created);

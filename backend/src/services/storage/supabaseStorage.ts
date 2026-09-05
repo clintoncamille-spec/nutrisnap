@@ -35,6 +35,10 @@ class SupabaseImageStorage implements ImageStorage {
     }
     return data.signedUrl;
   }
+
+  isOwnedByUser(userId: string, path: string): boolean {
+    return path.startsWith(`${userId}/`);
+  }
 }
 
 function sanitizeFileName(name: string): string {
