@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMealHistory, useFavoriteRecipes } from "@nutrisnap/shared";
 import { apiClient } from "../lib/apiClient";
-import { useAuth } from "../lib/AuthContext";
-import { supabase } from "../lib/supabase";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { RecipeCard } from "../components/RecipeCard";
 
-type Tab = "history" | "favorites" | "profile";
+type Tab = "history" | "favorites";
 
 export function History() {
   const [tab, setTab] = useState<Tab>("history");
@@ -16,7 +13,7 @@ export function History() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4">
       <div className="flex gap-2 border-b border-neutral-200">
-        {(["history", "favorites", "profile"] as Tab[]).map((t) => (
+        {(["history", "favorites"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -33,7 +30,6 @@ export function History() {
 
       {tab === "history" && <MealHistoryTab />}
       {tab === "favorites" && <FavoritesTab />}
-      {tab === "profile" && <ProfileTab />}
     </div>
   );
 }
@@ -81,55 +77,5 @@ function FavoritesTab() {
         <RecipeCard key={favorite.id} recipe={favorite.recipe} isFavorited onFavorite={() => {}} />
       ))}
     </div>
-  );
-}
-
-function ProfileTab() {
-  const { session } = useAuth();
-  const queryClient = useQueryClient();
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["profile"],
-    queryFn: () => apiClient.getProfile(),
-  });
-  const [calorieGoal, setCalorieGoal] = useState<number | null>(null);
-
-  const updateProfile = useMutation({
-    mutationFn: (dailyCalorieGoal: number) =>
-      apiClient.updateProfile({ dailyCalorieGoal }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
-  });
-
-  const goalValue = calorieGoal ?? profile?.dailyCalorieGoal ?? 2000;
-
-  return (
-    <Card className="flex flex-col gap-4">
-      <p className="text-sm text-neutral-600">
-        Signed in as <span className="font-medium">{session?.user.email}</span>
-      </p>
-
-      <label className="flex flex-col gap-1 text-sm text-neutral-700">
-        Daily calorie goal
-        <div className="flex gap-2">
-          <input
-            type="number"
-            value={goalValue}
-            disabled={isLoading}
-            onChange={(e) => setCalorieGoal(Number(e.target.value))}
-            className="w-32 rounded-md border border-neutral-200 px-2 py-1"
-          />
-          <Button
-            variant="secondary"
-            disabled={updateProfile.isPending}
-            onClick={() => updateProfile.mutate(goalValue)}
-          >
-            Save
-          </Button>
-        </div>
-      </label>
-
-      <Button variant="secondary" onClick={() => supabase.auth.signOut()} className="w-fit">
-        Log out
-      </Button>
-    </Card>
   );
 }

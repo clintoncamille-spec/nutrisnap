@@ -2,6 +2,11 @@ import { X } from "lucide-react";
 import type { FoodItem } from "@nutrisnap/shared";
 import { Card } from "./Card";
 
+// A generous sanity ceiling for a single food item's portion — well beyond
+// any real serving, just there to stop a manual entry like "99999" from
+// silently scaling macros into nonsense.
+const MAX_GRAMS = 5000;
+
 interface Props {
   item: FoodItem;
   onGramsChange: (grams: number) => void;
@@ -40,8 +45,12 @@ export function FoodItemCard({ item, onGramsChange, onRemove }: Props) {
         />
         <input
           type="number"
+          min={0}
+          max={MAX_GRAMS}
           value={Math.round(item.estimatedGrams)}
-          onChange={(e) => onGramsChange(Number(e.target.value) || 0)}
+          onChange={(e) =>
+            onGramsChange(Math.min(Math.max(Number(e.target.value) || 0, 0), MAX_GRAMS))
+          }
           className="w-16 rounded-md border border-neutral-200 px-2 py-1 text-sm"
         />
         <span className="text-xs text-neutral-500">g</span>

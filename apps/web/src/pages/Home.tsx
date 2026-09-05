@@ -1,20 +1,31 @@
 import { Camera, Refrigerator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useDailySummary } from "@nutrisnap/shared";
+import { useDailySummary, useProfile } from "@nutrisnap/shared";
 import { colors } from "../../../../packages/config/design-tokens.mjs";
 
 import { apiClient } from "../lib/apiClient";
 import { Card } from "../components/Card";
 import { ProgressRing } from "../components/ProgressRing";
 
+function greetingForHour(hour: number) {
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 export function Home() {
   const navigate = useNavigate();
   const { data, progress, isLoading } = useDailySummary(apiClient);
+  const { data: profile } = useProfile(apiClient);
+
+  const heading = profile?.displayName
+    ? `${greetingForHour(new Date().getHours())}, ${profile.displayName}`
+    : "NutriSnap";
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 p-4">
       <header>
-        <h1 className="text-2xl font-semibold text-neutral-900">NutriSnap</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900">{heading}</h1>
         <p className="text-sm text-neutral-500">What are we tracking today?</p>
       </header>
 
