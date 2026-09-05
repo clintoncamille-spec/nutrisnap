@@ -38,7 +38,7 @@ export default function Home() {
       </View>
 
       <Card>
-        <Text className="mb-4 text-sm font-medium text-neutral-700">Today's progress</Text>
+        <Text className="mb-4 text-sm font-medium text-neutral-700">Today&apos;s progress</Text>
         {isLoading || !data ? (
           <Text className="text-sm text-neutral-400">Loading…</Text>
         ) : (

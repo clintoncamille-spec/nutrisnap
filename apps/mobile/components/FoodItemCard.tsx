@@ -3,12 +3,22 @@ import Slider from "@react-native-community/slider";
 import { Swipeable } from "react-native-gesture-handler";
 import { X } from "lucide-react-native";
 import type { FoodItem } from "@nutrisnap/shared";
+import { colors } from "@nutrisnap/config/design-tokens";
 import { Card } from "./Card";
+
+// A generous sanity ceiling for a single food item's portion — well beyond
+// any real serving, just there to stop a manual entry like "99999" from
+// silently scaling macros into nonsense. Mirrors apps/web's FoodItemCard.
+const MAX_GRAMS = 5000;
 
 interface Props {
   item: FoodItem;
   onGramsChange: (grams: number) => void;
   onRemove: () => void;
+}
+
+function clampGrams(value: number): number {
+  return Math.min(Math.max(value, 0), MAX_GRAMS);
 }
 
 export function FoodItemCard({ item, onGramsChange, onRemove }: Props) {
@@ -37,12 +47,12 @@ export function FoodItemCard({ item, onGramsChange, onRemove }: Props) {
             minimumValue={0}
             maximumValue={Math.max(500, item.estimatedGrams * 2)}
             value={item.estimatedGrams}
-            onSlidingComplete={onGramsChange}
-            minimumTrackTintColor="#16a34a"
+            onSlidingComplete={(value) => onGramsChange(clampGrams(value))}
+            minimumTrackTintColor={colors.primary[600]}
           />
           <TextInput
             value={String(Math.round(item.estimatedGrams))}
-            onChangeText={(text) => onGramsChange(Number(text) || 0)}
+            onChangeText={(text) => onGramsChange(clampGrams(Number(text) || 0))}
             keyboardType="numeric"
             className="w-14 rounded-md border border-neutral-200 px-2 py-1 text-sm"
           />
